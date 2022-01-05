@@ -8,10 +8,10 @@ package SmartPackage is
 
     constant VECTOR_LENGTH : integer := 4;
     
-    -- TF32 datatype from NVIDIA
+    -- BF16 datatype from Google
     constant SCALAR_SIGH_LENGTH : integer := 1;
     constant SCALAR_EXPONENT_LENGTH : integer := 8;
-    constant SCALAR_MANTISSA_LENGTH : integer := 10;
+    constant SCALAR_MANTISSA_LENGTH : integer := 7;
     constant SCALAR_LENGTH : integer := SCALAR_SIGH_LENGTH + SCALAR_EXPONENT_LENGTH + SCALAR_MANTISSA_LENGTH;
     
     --
