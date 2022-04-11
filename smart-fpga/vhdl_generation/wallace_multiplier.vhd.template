@@ -1,0 +1,31 @@
+library IEEE;
+library IEEE.std_logic_1164.all;
+
+entity wallace_multiplier is
+
+end wallace_multiplier;
+
+architecture Behavioral of wallace_multiplier is
+
+component full_adder is
+ Port ( A : in STD_LOGIC;
+         B : in STD_LOGIC;
+         Cin : in STD_LOGIC;
+         S : out STD_LOGIC;
+         Cout : out STD_LOGIC);
+end component;
+
+component half_adder is
+ Port ( A : in STD_LOGIC;
+         B : in STD_LOGIC;
+         S : out STD_LOGIC;
+         Cout : out STD_LOGIC);
+end component;
+
+$signal_definitions
+
+begin
+
+$stages
+
+end Behavioral;
