@@ -103,9 +103,9 @@ class WallaceStage:
         for row in range(longest_list_size):
             for column in range(len(lists) - 1, -1, -1):
                 if len(lists[column]) > row:
-                    out += str(lists[column][row])
+                    out += f"{lists[column][row].stage_index:02}|"
                 else:
-                    out += " "
+                    out += "  "
             out += "\n"
         return out
 

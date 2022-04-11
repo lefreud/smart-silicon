@@ -13,7 +13,7 @@ def generate_wallace_vhdl_code(operands_size_bits):
         template = Template(f.read())
 
         stage = get_first_stage(operands_size_bits)
-        stage_num = 1
+        stage_num = 2
         while not stage.is_final_stage():
             stage.reduce()
             print(stage)
@@ -30,7 +30,7 @@ def generate_wallace_vhdl_code(operands_size_bits):
 
 def main():
     with open(VHDL_SOURCES_FOLDER / "wallace_multiplier.vhdl", "w") as f:
-        f.write(generate_wallace_vhdl_code(4))
+        f.write(generate_wallace_vhdl_code(16))
 
 
 if __name__ == "__main__":
