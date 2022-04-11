@@ -105,7 +105,7 @@ class WallaceStage:
                 if len(lists[column]) > row:
                     out += f"{lists[column][row].stage_index:02}|"
                 else:
-                    out += "  "
+                    out += "   "
             out += "\n"
         return out
 
