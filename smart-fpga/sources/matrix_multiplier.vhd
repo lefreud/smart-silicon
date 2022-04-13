@@ -12,7 +12,8 @@ use work.SmartPackage.ALL;
 --use UNISIM.VComponents.all;
 
 entity matrix_multiplier is
-    Port ( i_clk : in STD_LOGIC;
+    Port ( CLK : in STD_LOGIC;
+           en : in STD_LOGIC;
            i_rst : in std_logic;
            i_left : in vector;
            i_top : in vector;
@@ -30,7 +31,8 @@ architecture Behavioral of matrix_multiplier is
     signal s_data_bus : vector;
     
     component matrix_multiplier_element is
-        Port ( i_clk : in STD_LOGIC;
+        Port ( CLK : in STD_LOGIC;
+               en : in STD_LOGIC;
                i_rst : in std_logic;
                i_left : in scalar;
                i_top : in scalar;
@@ -43,7 +45,8 @@ architecture Behavioral of matrix_multiplier is
     
     component delay_reg is
         generic ( width : integer; delay : integer );
-        Port ( i_clk : in STD_LOGIC;
+        Port ( CLK : in STD_LOGIC;
+               en : in STD_LOGIC;
                i_data : in STD_LOGIC_VECTOR (width - 1 downto 0);
                o_data : out STD_LOGIC_VECTOR (width - 1 downto 0));
     end component;
@@ -54,7 +57,8 @@ inst_top :
 inst_delay :
         delay_reg
         generic map ( width => SCALAR_LENGTH, delay => column )
-        port map ( i_clk => i_clk,
+        port map ( CLK => CLK,
+               en => en,
                i_data => i_top(column),
                o_data => s_vertical_paths(0, column));
     end generate;
@@ -64,7 +68,8 @@ inst_top_req_result :
 inst_delay :
         delay_reg
         generic map ( width => 1, delay => column + 1 )
-        port map ( i_clk => i_clk,
+        port map ( CLK => CLK,
+               en => en,
                i_data(0) => i_req_result,
                o_data(0) => s_req_result(0, column));
     end generate;
@@ -74,7 +79,8 @@ inst_left :
 inst_delay:
         delay_reg
         generic map ( width => SCALAR_LENGTH, delay => row )
-        port map ( i_clk => i_clk,
+        port map ( CLK => CLK,
+                en => en,
                 i_data => i_left(row),
                 o_data => s_horizontal_paths(row, 0));
     end generate;
@@ -87,7 +93,8 @@ inst_element_reg :
             if row < VECTOR_LENGTH - 1 and column < VECTOR_LENGTH - 1 generate
 inst_element_reg_0 : 
                 matrix_multiplier_element 
-                    port map ( i_clk => i_clk,
+                    port map ( CLK => CLK,
+                           en => en,
                            i_rst => i_rst,
                            i_left => s_horizontal_paths(row, column),
                            i_top => s_vertical_paths(row, column),
@@ -96,10 +103,13 @@ inst_element_reg_0 :
                            o_bottom => s_vertical_paths(row + 1, column),
                            o_right => s_horizontal_paths(row, column + 1),
                            o_data_bus => s_data_bus(column));
-            elsif row < VECTOR_LENGTH - 1 generate
-inst_element_reg_1 : 
+            end generate;
+inst_element_reg_1 :
+            if row < VECTOR_LENGTH - 1 generate
+inst_element_reg_2 : 
                 matrix_multiplier_element 
-                    port map ( i_clk => i_clk,
+                    port map ( CLK => CLK,
+                           en => en,
                            i_rst => i_rst,
                            i_left => s_horizontal_paths(row, column),
                            i_top => s_vertical_paths(row, column),
@@ -108,10 +118,13 @@ inst_element_reg_1 :
                            o_bottom => s_vertical_paths(row + 1, column),
                            o_right => open,
                            o_data_bus => s_data_bus(column));
-            elsif column < VECTOR_LENGTH - 1 generate
-inst_element_reg_2 : 
+            end generate;
+inst_element_reg_3 :             
+            if column < VECTOR_LENGTH - 1 generate
+inst_element_reg_4 : 
                 matrix_multiplier_element 
-                    port map ( i_clk => i_clk,
+                    port map ( CLK => CLK,
+                           en => en,
                            i_rst => i_rst,
                            i_left => s_horizontal_paths(row, column),
                            i_top => s_vertical_paths(row, column),
@@ -120,10 +133,13 @@ inst_element_reg_2 :
                            o_bottom => open,
                            o_right => s_horizontal_paths(row, column + 1),
                            o_data_bus => s_data_bus(column));
-            else generate
+            end generate;
+inst_element_reg_5 :            
+            if  row >= VECTOR_LENGTH - 1 and column >= VECTOR_LENGTH - 1 generate
 inst_element_last_3 : 
                 matrix_multiplier_element 
-                    port map ( i_clk => i_clk,
+                    port map ( CLK => CLK,
+                           en => en,
                            i_rst => i_rst,
                            i_left => s_horizontal_paths(row, column),
                            i_top => s_vertical_paths(row, column),
