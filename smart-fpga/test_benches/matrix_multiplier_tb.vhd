@@ -38,7 +38,8 @@ end matrix_multiplier_tb;
 
 architecture Behavioral of matrix_multiplier_tb is
     component matrix_multiplier is
-        Port ( i_clk : in STD_LOGIC;
+        Port ( CLK : in STD_LOGIC;
+               en : in STD_LOGIC;
                i_rst : in std_logic;
                i_left : in vector;
                i_top : in vector;
@@ -48,6 +49,7 @@ architecture Behavioral of matrix_multiplier_tb is
     end component;
     
     signal s_clk : STD_LOGIC;
+    signal s_en : std_logic;
     signal s_rst : std_logic;
     signal s_left : vector;
     signal s_top : vector;
@@ -58,7 +60,8 @@ architecture Behavioral of matrix_multiplier_tb is
 begin
 
     UUT : matrix_multiplier
-        Port map ( i_clk => s_clk,
+        Port map ( CLK => s_clk,
+               en => s_en,
                i_rst => s_rst,
                i_left => s_left,
                i_top => s_top,
@@ -91,13 +94,19 @@ begin
         --        [0x4b8 0x4ee 0x524 0x55a]]
         
         wait for 5 ns;
-        s_left <= (X"0003", X"0007", X"0000", X"0000");
+        s_left <= (X"0000", X"0000", X"0000", X"0000");
         s_top <= (X"0000", X"0000", X"0000", X"0000"); -- todo: comment?
         s_rst <= '1';
+        s_en <= '0';
+        s_req_result <= '0';
         wait for 5 ns;
         
         -- auto-generated in python script
         s_rst <= '0';
+        wait for 5 * clk_period;
+        s_en <= '1';
+        wait for 5 * clk_period;
+        
         s_req_result <= '1';
         s_left <= (X"000f", X"000b", X"0007", X"0003");
         s_top <= (X"001f", X"001e", X"001d", X"001c");

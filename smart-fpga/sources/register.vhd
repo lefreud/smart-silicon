@@ -12,7 +12,9 @@ use IEEE.STD_LOGIC_1164.ALL;
 
 entity reg is
     generic ( width : integer );
-    Port ( i_clk : in STD_LOGIC;
+    Port ( CLK : in STD_LOGIC;
+           en : in STD_LOGIC;
+           rst : in STD_LOGIC;
            i_data : in STD_LOGIC_VECTOR (width - 1 downto 0);
            o_data : out STD_LOGIC_VECTOR (width - 1 downto 0));
 end reg;
@@ -21,8 +23,10 @@ architecture Behavioral of reg is
 
 begin
 
-    process (i_clk) begin
-        if rising_edge(i_clk) then
+    process (CLK, rst) begin
+        if rst = '1' then
+            o_data <= (others => '0');
+        elsif rising_edge(CLK) and en = '1' then
             o_data <= i_data;
         end if;
     end process;

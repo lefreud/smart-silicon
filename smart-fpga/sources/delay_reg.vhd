@@ -33,7 +33,9 @@ use IEEE.STD_LOGIC_1164.ALL;
 
 entity delay_reg is
     generic ( width : integer; delay : integer );
-    Port ( i_clk : in STD_LOGIC;
+    Port ( CLK : in STD_LOGIC;
+           en : in STD_LOGIC;
+           rst: in std_logic;
            i_data : in STD_LOGIC_VECTOR (width - 1 downto 0);
            o_data : out STD_LOGIC_VECTOR (width - 1 downto 0));
 end delay_reg;
@@ -42,7 +44,9 @@ architecture Behavioral of delay_reg is
 
     component reg is
         generic ( width : integer );
-        Port ( i_clk : in STD_LOGIC;
+        Port ( CLK : in STD_LOGIC;
+               en : in STD_LOGIC;
+               rst : in STD_LOGIC;
                i_data : in STD_LOGIC_VECTOR (width - 1 downto 0);
                o_data : out STD_LOGIC_VECTOR (width - 1 downto 0));
     end component;
@@ -59,16 +63,22 @@ inst_reg:
             reg 
             generic map ( width => width )
             port map (
-                i_clk => i_clk,
+                CLK => CLK,
+                en => en,
+                rst => rst,
                 i_data => i_data,
                 o_data => s_data(i)
             );
-        else generate
+        end generate;
+inst_reg1:
+        if i /= 0 generate
 inst_reg:
             reg 
             generic map ( width => width )
             port map (
-                i_clk => i_clk,
+                CLK => CLK,
+                en => en,
+                rst => rst,
                 i_data => s_data(i-1),
                 o_data => s_data(i)
             );
@@ -78,7 +88,9 @@ inst_reg:
 inst_delay :
     if delay = 0 generate
         o_data <= i_data;
-    else generate
+    end generate;
+inst_delay1 :
+    if delay /=0 generate
         o_data <= s_data(delay - 1);
     end generate;
 end Behavioral;

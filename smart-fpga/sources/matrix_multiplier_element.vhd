@@ -33,7 +33,8 @@ use IEEE.numeric_std.ALL;
 --use UNISIM.VComponents.all;
 
 entity matrix_multiplier_element is
-    Port ( i_clk : in STD_LOGIC;
+    Port ( CLK : in STD_LOGIC;
+           en : in STD_LOGIC;
            i_rst : in std_logic;
            i_left : in scalar;
            i_top : in scalar;
@@ -52,7 +53,7 @@ architecture Behavioral of matrix_multiplier_element is
 begin
     
     s_product <= scalar(s_full_product(SCALAR_LENGTH - 1 downto 0));
-    process (i_clk, i_rst) begin
+    process (CLK, i_rst) begin
         if i_rst = '1' then
             o_req_result <= '0';
             o_bottom <= (others => '0');
@@ -62,7 +63,7 @@ begin
             s_full_product <= (others => '0');
             s_rst_sum <= '0';
         else
-            if rising_edge(i_clk) then
+            if rising_edge(CLK) and en = '1' then
                 o_right <= i_left;
                 o_bottom <= i_top;
                 s_full_product <= std_logic_vector(signed(i_left) * signed(i_top));
