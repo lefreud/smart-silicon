@@ -35,6 +35,7 @@ entity delay_reg is
     generic ( width : integer; delay : integer );
     Port ( CLK : in STD_LOGIC;
            en : in STD_LOGIC;
+           rst: in std_logic;
            i_data : in STD_LOGIC_VECTOR (width - 1 downto 0);
            o_data : out STD_LOGIC_VECTOR (width - 1 downto 0));
 end delay_reg;
@@ -45,6 +46,7 @@ architecture Behavioral of delay_reg is
         generic ( width : integer );
         Port ( CLK : in STD_LOGIC;
                en : in STD_LOGIC;
+               rst : in STD_LOGIC;
                i_data : in STD_LOGIC_VECTOR (width - 1 downto 0);
                o_data : out STD_LOGIC_VECTOR (width - 1 downto 0));
     end component;
@@ -63,6 +65,7 @@ inst_reg:
             port map (
                 CLK => CLK,
                 en => en,
+                rst => rst,
                 i_data => i_data,
                 o_data => s_data(i)
             );
@@ -75,6 +78,7 @@ inst_reg:
             port map (
                 CLK => CLK,
                 en => en,
+                rst => rst,
                 i_data => s_data(i-1),
                 o_data => s_data(i)
             );

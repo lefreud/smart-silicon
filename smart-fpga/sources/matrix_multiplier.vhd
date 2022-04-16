@@ -46,6 +46,7 @@ architecture Behavioral of matrix_multiplier is
     component delay_reg is
         generic ( width : integer; delay : integer );
         Port ( CLK : in STD_LOGIC;
+               rst : in STD_LOGIC;
                en : in STD_LOGIC;
                i_data : in STD_LOGIC_VECTOR (width - 1 downto 0);
                o_data : out STD_LOGIC_VECTOR (width - 1 downto 0));
@@ -59,6 +60,7 @@ inst_delay :
         generic map ( width => SCALAR_LENGTH, delay => column )
         port map ( CLK => CLK,
                en => en,
+               rst => i_rst,
                i_data => i_top(column),
                o_data => s_vertical_paths(0, column));
     end generate;
@@ -70,6 +72,7 @@ inst_delay :
         generic map ( width => 1, delay => column + 1 )
         port map ( CLK => CLK,
                en => en,
+               rst => i_rst,
                i_data(0) => i_req_result,
                o_data(0) => s_req_result(0, column));
     end generate;
@@ -81,9 +84,23 @@ inst_delay:
         generic map ( width => SCALAR_LENGTH, delay => row )
         port map ( CLK => CLK,
                 en => en,
+                rst => i_rst,
                 i_data => i_left(row),
                 o_data => s_horizontal_paths(row, 0));
     end generate;
+
+inst_data_out :
+     for column in 0 to VECTOR_LENGTH - 1 generate
+        
+inst_delay:
+        delay_reg
+        generic map ( width => SCALAR_LENGTH, delay => VECTOR_LENGTH - column - 1 )
+        port map ( CLK => CLK,
+                en => en,
+                rst => i_rst,
+                i_data => s_data_bus(column),
+                o_data => o_data(column));
+     end generate;
 
 inst_elements_rows : 
     for row in 0 to VECTOR_LENGTH - 1 generate
@@ -151,6 +168,4 @@ inst_element_last_3 :
             end generate;
         end generate;
     end generate;
-    
-    o_data <= s_data_bus;
 end Behavioral;
