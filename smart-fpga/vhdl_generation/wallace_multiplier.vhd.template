@@ -2,7 +2,11 @@ library IEEE;
 library IEEE.std_logic_1164.all;
 
 entity wallace_multiplier is
-
+  port (
+    a : in std_logic_vector($operands_size_bits - 1 downto 0);
+    b : in std_logic_vector($operands_size_bits - 1 downto 0);
+    out : out std_logic_vector($operands_size_bits - 1 downto 0)
+  );
 end wallace_multiplier;
 
 architecture Behavioral of wallace_multiplier is
@@ -22,10 +26,13 @@ component half_adder is
          Cout : out STD_LOGIC);
 end component;
 
+type partial_products_type is array (0 to $operands_size_bits - 1) of std_logic_vector($operands_size_bits - 1 downto 0);
+signal partial_products : partial_products_type;
+
 $signal_definitions
 
 begin
 
-$stages
+$component_instances
 
 end Behavioral;

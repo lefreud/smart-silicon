@@ -21,8 +21,9 @@ def generate_wallace_vhdl_code(operands_size_bits):
             stage_num += 1
 
         result = template.substitute({
+            "operands_size_bits": operands_size_bits,
             "signal_definitions": "signal",
-            "stages": stage.vhdl_code
+            "component_instances": stage.vhdl_code
         })
 
     return result

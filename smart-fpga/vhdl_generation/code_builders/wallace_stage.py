@@ -1,14 +1,16 @@
-from vhdl_signal import Signal
+from signals.vhdl_signal import Signal
 from typing import *
-from adders import HalfAdder, FullAdder
+from component_instances.adders import HalfAdder, FullAdder
+from code_builders.abstract_code_builder import AbstractCodeBuilder
 
 
 def get_first_stage(operands_size_bits):
     input_signal_lists = []
+    signal_index = 0
     for column in range(operands_size_bits):
         input_signal_lists.append([])
         for row in range(column):
-            input_signal_lists[column].append(Signal(0))
+            input_signal_lists[column].append(Signal(f"first_stage_{signal_index}", stage=0))
 
     for column in range(operands_size_bits, operands_size_bits * 2):
         input_signal_lists.append([])
@@ -18,7 +20,7 @@ def get_first_stage(operands_size_bits):
     return WallaceStage(input_signal_lists, 1)
 
 
-class WallaceStage:
+class WallaceStage(AbstractCodeBuilder):
     def __init__(self, input_signal_lists: List[List[Signal]], stage_index):
         self.input_signal_lists = input_signal_lists
         self.full_adders = None
@@ -26,7 +28,13 @@ class WallaceStage:
         self.output_signal_lists: List[List[Signal]] = []
         self.stage_index = stage_index
 
-    def reduce(self):
+    def get_declared_signals(self):
+        return [signal for signal_list in self.input_signal_lists for signal in signal_list]
+
+    def get_component_instances(self):
+        return self.full_adders + self.half_adders
+
+    def build(self):
         self.full_adders = []
         self.half_adders = []
         self.output_signal_lists = []
@@ -109,22 +117,22 @@ class WallaceStage:
             out += "\n"
         return out
 
-    @property
-    def vhdl_code(self):
-
-        longest_list_size = 0
-        for column in range(len(self.input_signal_lists)):
-            if len(self.input_signal_lists[column]) > longest_list_size:
-                longest_list_size = len(self.input_signal_lists[column])
-
-        out = ""
-        out += "#### INPUT ####\n"
-        out += self._signal_lists_to_str(self.input_signal_lists)
-
-        out += "#### OUTPUT ####\n"
-        out += self._signal_lists_to_str(self.output_signal_lists)
-
-        return out
+    # @property
+    # def vhdl_code(self):
+#
+    #     longest_list_size = 0
+    #     for column in range(len(self.input_signal_lists)):
+    #         if len(self.input_signal_lists[column]) > longest_list_size:
+    #             longest_list_size = len(self.input_signal_lists[column])
+#
+    #     out = ""
+    #     out += "#### INPUT ####\n"
+    #     out += self._signal_lists_to_str(self.input_signal_lists)
+#
+    #     out += "#### OUTPUT ####\n"
+    #     out += self._signal_lists_to_str(self.output_signal_lists)
+#
+    #     return out
 
     def is_final_stage(self):
         for input_signal_list in self.input_signal_lists:
