@@ -12,4 +12,4 @@ architecture Behavioural of half_adder is
 begin
  S <= A XOR B;
  Cout <= A AND B;
-end gate_level;
+end Behavioural;

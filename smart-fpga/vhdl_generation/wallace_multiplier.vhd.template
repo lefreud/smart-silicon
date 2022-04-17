@@ -1,11 +1,11 @@
 library IEEE;
-library IEEE.std_logic_1164.all;
+use IEEE.std_logic_1164.all;
 
 entity wallace_multiplier is
   port (
     a : in std_logic_vector($operands_size_bits - 1 downto 0);
     b : in std_logic_vector($operands_size_bits - 1 downto 0);
-    out : out std_logic_vector($operands_size_bits - 1 downto 0)
+    c : out std_logic_vector($output_size_bits - 1 downto 0)
   );
 end wallace_multiplier;
 

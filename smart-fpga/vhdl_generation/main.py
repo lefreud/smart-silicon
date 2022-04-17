@@ -16,6 +16,7 @@ def generate_wallace_vhdl_code(operands_size_bits):
         wallace_multiplier.build()
 
         result = template.substitute({
+            "output_size_bits": operands_size_bits * 2 - 1,
             "operands_size_bits": operands_size_bits,
             "signal_definitions": wallace_multiplier.get_signals_declaration_code(),
             "component_instances": wallace_multiplier.get_component_instances_code(),

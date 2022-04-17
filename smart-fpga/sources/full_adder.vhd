@@ -13,4 +13,4 @@ architecture Behavioural of full_adder is
 begin
  S <= A XOR B XOR Cin;
  Cout <= (A AND B) OR (Cin AND A) OR (Cin AND B);
-end gate_level;
+end Behavioural;

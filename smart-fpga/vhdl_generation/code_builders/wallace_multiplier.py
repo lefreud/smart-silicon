@@ -4,6 +4,7 @@ from component_instances.abstract_component_instance import AbstractComponentIns
 from signals.vhdl_signal import Signal
 from code_builders.wallace_stage import WallaceStage
 from code_builders.partial_products import PartialProductsBuilder
+from code_builders.ripple_carry_adder import RippleCarryAdder
 import itertools
 
 
@@ -12,6 +13,7 @@ class WallaceMultiplier(AbstractCodeBuilder):
         self.operands_size_bits = operands_size_bits
         self.stages = []
         self.partial_products_builder = None
+        self.ripple_carry_adder = None
 
     def _get_first_stage(self, operands_size_bits):
         a_signal_list = [Signal(f"a({i})") for i in range(operands_size_bits)]
@@ -36,10 +38,15 @@ class WallaceMultiplier(AbstractCodeBuilder):
             self.stages[-1].build()
             stage_num += 1
 
+        self.ripple_carry_adder = RippleCarryAdder(self.stages[-1].output_signal_lists)
+        self.ripple_carry_adder.build()
+
     def get_declared_signals(self) -> List[Signal]:
         return [signal for stage in self.stages for signal in stage.get_declared_signals()] \
-                       + self.partial_products_builder.get_declared_signals()
+               + self.partial_products_builder.get_declared_signals() \
+               + self.ripple_carry_adder.get_declared_signals()
 
     def get_component_instances(self) -> List[AbstractComponentInstance]:
         return list(itertools.chain.from_iterable([stage.get_component_instances() for stage in self.stages])) \
-               + self.partial_products_builder.get_component_instances()
+               + self.partial_products_builder.get_component_instances() \
+               + self.ripple_carry_adder.get_component_instances()
