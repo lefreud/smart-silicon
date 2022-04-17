@@ -1,7 +1,7 @@
 import os.path
 from pathlib import Path
 from string import Template
-from wallace_stage import WallaceStage, get_first_stage
+from code_builders.wallace_multiplier import WallaceMultiplier
 
 
 VHDL_SOURCES_FOLDER = Path(os.path.dirname(__file__)).parent / "sources"
@@ -12,18 +12,13 @@ def generate_wallace_vhdl_code(operands_size_bits):
     with open(WALLACE_MULTIPLIER_TEMPLATE_PATH) as f:
         template = Template(f.read())
 
-        stage = get_first_stage(operands_size_bits)
-        stage_num = 2
-        while not stage.is_final_stage():
-            stage.reduce()
-            print(stage)
-            stage = WallaceStage(stage.output_signal_lists, stage_num)
-            stage_num += 1
+        wallace_multiplier = WallaceMultiplier(operands_size_bits)
+        wallace_multiplier.build()
 
         result = template.substitute({
             "operands_size_bits": operands_size_bits,
-            "signal_definitions": "signal",
-            "component_instances": stage.vhdl_code
+            "signal_definitions": wallace_multiplier.get_signals_declaration_code(),
+            "component_instances": wallace_multiplier.get_component_instances_code(),
         })
 
     return result

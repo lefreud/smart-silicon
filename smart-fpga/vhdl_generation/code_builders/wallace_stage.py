@@ -2,22 +2,7 @@ from signals.vhdl_signal import Signal
 from typing import *
 from component_instances.adders import HalfAdder, FullAdder
 from code_builders.abstract_code_builder import AbstractCodeBuilder
-
-
-def get_first_stage(operands_size_bits):
-    input_signal_lists = []
-    signal_index = 0
-    for column in range(operands_size_bits):
-        input_signal_lists.append([])
-        for row in range(column):
-            input_signal_lists[column].append(Signal(f"first_stage_{signal_index}", stage=0))
-
-    for column in range(operands_size_bits, operands_size_bits * 2):
-        input_signal_lists.append([])
-        for row in range(operands_size_bits * 2 - column):
-            input_signal_lists[column].append(Signal(0))
-
-    return WallaceStage(input_signal_lists, 1)
+from random import randint
 
 
 class WallaceStage(AbstractCodeBuilder):
@@ -27,9 +12,10 @@ class WallaceStage(AbstractCodeBuilder):
         self.half_adders = None
         self.output_signal_lists: List[List[Signal]] = []
         self.stage_index = stage_index
+        self.declared_signals = []
 
     def get_declared_signals(self):
-        return [signal for signal_list in self.input_signal_lists for signal in signal_list]
+        return self.declared_signals
 
     def get_component_instances(self):
         return self.full_adders + self.half_adders
@@ -57,20 +43,25 @@ class WallaceStage(AbstractCodeBuilder):
             if len(self.input_signal_lists[column]) < longest_list_size:
                 last_long_column = column - 1
                 break
+            if len(self.input_signal_lists[column]) < 3:
+                print(f"Column {column} is too short")
             self.add_full_adder(column)
 
         if len(self.input_signal_lists[last_long_column + 1]) == longest_list_size - 1:
             self.add_half_adder(last_long_column + 1)
 
     def add_full_adder(self, column):
-        new_sum = Signal(self.stage_index)
-        new_carry_out = Signal(self.stage_index)
-        self.half_adders.append(FullAdder(
+        new_sum = Signal(f"sum_{randint(0, 1000000)}", self.stage_index)
+        new_carry_out = Signal(f"cout_{randint(0, 1000000)}", self.stage_index)
+        self.declared_signals.append(new_sum)
+        self.declared_signals.append(new_carry_out)
+        self.full_adders.append(FullAdder(
             a=self.input_signal_lists[column][-1],
             b=self.input_signal_lists[column][-2],
             carry_in=self.input_signal_lists[column][-3],
             sum=new_sum,
             carry_out=new_carry_out,
+            name=f"full_adder_{randint(0, 100000)}"
         ))
         self.output_signal_lists[column].remove(self.input_signal_lists[column][-1])
         self.output_signal_lists[column].remove(self.input_signal_lists[column][-2])
@@ -79,13 +70,16 @@ class WallaceStage(AbstractCodeBuilder):
         self.output_signal_lists[column + 1].append(new_carry_out)
 
     def add_half_adder(self, column):
-        new_sum = Signal(self.stage_index)
-        new_carry_out = Signal(self.stage_index)
+        new_sum = Signal(f"sum_{randint(0, 1000000)}", self.stage_index)
+        new_carry_out = Signal(f"cout_{randint(0, 1000000)}", self.stage_index)
+        self.declared_signals.append(new_sum)
+        self.declared_signals.append(new_carry_out)
         self.half_adders.append(HalfAdder(
             a=self.input_signal_lists[column][-1],
             b=self.input_signal_lists[column][-2],
             sum=new_sum,
             carry_out=new_carry_out,
+            name=f"half_adder_{randint(0, 100000)}"
         ))
         self.output_signal_lists[column].remove(self.input_signal_lists[column][-1])
         self.output_signal_lists[column].remove(self.input_signal_lists[column][-2])
@@ -117,25 +111,8 @@ class WallaceStage(AbstractCodeBuilder):
             out += "\n"
         return out
 
-    # @property
-    # def vhdl_code(self):
-#
-    #     longest_list_size = 0
-    #     for column in range(len(self.input_signal_lists)):
-    #         if len(self.input_signal_lists[column]) > longest_list_size:
-    #             longest_list_size = len(self.input_signal_lists[column])
-#
-    #     out = ""
-    #     out += "#### INPUT ####\n"
-    #     out += self._signal_lists_to_str(self.input_signal_lists)
-#
-    #     out += "#### OUTPUT ####\n"
-    #     out += self._signal_lists_to_str(self.output_signal_lists)
-#
-    #     return out
-
     def is_final_stage(self):
         for input_signal_list in self.input_signal_lists:
-            if len(input_signal_list) > 2:
+            if len(input_signal_list) > 3:
                 return False
         return True
