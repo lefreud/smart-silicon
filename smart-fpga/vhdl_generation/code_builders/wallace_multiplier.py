@@ -16,8 +16,8 @@ class WallaceMultiplier(AbstractCodeBuilder):
         self.ripple_carry_adder = None
 
     def _get_first_stage(self, operands_size_bits):
-        a_signal_list = [Signal(f"a({i})") for i in range(operands_size_bits)]
-        b_signal_list = [Signal(f"b({i})") for i in range(operands_size_bits)]
+        a_signal_list = [Signal(f"a({i})", 0) for i in range(operands_size_bits)]
+        b_signal_list = [Signal(f"b({i})", 0) for i in range(operands_size_bits)]
         self.partial_products_builder = PartialProductsBuilder(a_signal_list, b_signal_list)
         self.partial_products_builder.build()
         partial_products = self.partial_products_builder.get_partial_products()
@@ -31,11 +31,16 @@ class WallaceMultiplier(AbstractCodeBuilder):
 
     def build(self):
         self.stages.append(self._get_first_stage(self.operands_size_bits))
+        print(f"Building stage 1")
         self.stages[-1].build()
+        print(self.stages[-1])
+
         stage_num = 2
         while not self.stages[-1].is_final_stage():
             self.stages.append(WallaceStage(self.stages[-1].output_signal_lists, stage_num))
+            print(f"Building stage {stage_num}")
             self.stages[-1].build()
+            print(self.stages[-1])
             stage_num += 1
 
         self.ripple_carry_adder = RippleCarryAdder(self.stages[-1].output_signal_lists)

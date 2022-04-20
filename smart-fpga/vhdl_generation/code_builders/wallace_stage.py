@@ -87,13 +87,7 @@ class WallaceStage(AbstractCodeBuilder):
         self.output_signal_lists[column + 1].append(new_carry_out)
 
     def __str__(self):
-        out = ""
-        out += "#### INPUT ####\n"
-        out += self._signal_lists_to_str(self.input_signal_lists)
-
-        out += "#### OUTPUT ####\n"
-        out += self._signal_lists_to_str(self.output_signal_lists)
-        return out
+        return self._signal_lists_to_str(self.output_signal_lists)
 
     def _signal_lists_to_str(self, lists):
         longest_list_size = 0
@@ -105,7 +99,7 @@ class WallaceStage(AbstractCodeBuilder):
         for row in range(longest_list_size):
             for column in range(len(lists) - 1, -1, -1):
                 if len(lists[column]) > row:
-                    out += f"{lists[column][row].stage_index:02}|"
+                    out += f"{lists[column][row].stage:02}|"
                 else:
                     out += "   "
             out += "\n"

@@ -17,7 +17,7 @@ class PartialProductsBuilder(AbstractCodeBuilder):
         for i in range(len(self.b_signals)):
             self.partial_products.append([])
             for j in range(len(self.a_signals)):
-                out = Signal(f"pp_{j}_{i}")
+                out = Signal(f"pp_{j}_{i}", 0)
                 self.and_gates.append(AndGate(self.a_signals[j], self.b_signals[i], out))
                 self.partial_products[i].append(out)
                 self.declared_signals.append(out)
