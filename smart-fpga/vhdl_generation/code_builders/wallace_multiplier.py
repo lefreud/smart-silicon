@@ -5,6 +5,8 @@ from signals.vhdl_signal import Signal
 from code_builders.wallace_stage import WallaceStage
 from code_builders.partial_products import PartialProductsBuilder
 from code_builders.ripple_carry_adder import RippleCarryAdder
+from component_instances.assignment import Assignment
+from component_instances.carry_bypass_adder import CarryBypassAdder
 import itertools
 
 
@@ -13,7 +15,8 @@ class WallaceMultiplier(AbstractCodeBuilder):
         self.operands_size_bits = operands_size_bits
         self.stages = []
         self.partial_products_builder = None
-        self.ripple_carry_adder = None
+        self.carry_bypass_adder = None
+        self.carry_bypass_adder_assignments = None
 
     def _get_first_stage(self, operands_size_bits):
         a_signal_list = [Signal(f"a({i})", 0) for i in range(operands_size_bits)]
@@ -43,15 +46,20 @@ class WallaceMultiplier(AbstractCodeBuilder):
             print(self.stages[-1])
             stage_num += 1
 
-        self.ripple_carry_adder = RippleCarryAdder(self.stages[-1].output_signal_lists)
-        self.ripple_carry_adder.build()
+        a = [s[0] for s in self.stages[-1].output_signal_lists]
+        b = [s[1] for s in self.stages[-1].output_signal_lists if len(s) > 1]
+        self.carry_bypass_adder_assignments = \
+            [Assignment(Signal("carry_bypass_a"), Signal("'0' & " + ' & '.join(s.name for s in reversed(a)))),
+             Assignment(Signal("carry_bypass_b"), Signal("'0' & " + ' & '.join(s.name for s in reversed(b)) + " & '0'"))]
+        self.carry_bypass_adder = CarryBypassAdder("carry_bypass_adder_0", Signal("carry_bypass_a"),
+                                                   Signal("carry_bypass_b"))
 
     def get_declared_signals(self) -> List[Signal]:
         return [signal for stage in self.stages for signal in stage.get_declared_signals()] \
-               + self.partial_products_builder.get_declared_signals() \
-               + self.ripple_carry_adder.get_declared_signals()
+               + self.partial_products_builder.get_declared_signals()
 
     def get_component_instances(self) -> List[AbstractComponentInstance]:
         return list(itertools.chain.from_iterable([stage.get_component_instances() for stage in self.stages])) \
                + self.partial_products_builder.get_component_instances() \
-               + self.ripple_carry_adder.get_component_instances()
+               + [self.carry_bypass_adder] + \
+               self.carry_bypass_adder_assignments
