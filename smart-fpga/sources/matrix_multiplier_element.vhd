@@ -46,11 +46,27 @@ entity matrix_multiplier_element is
 end matrix_multiplier_element;
 
 architecture Behavioral of matrix_multiplier_element is
+    component wallace_multiplier is
+      port (
+        a : in std_logic_vector(16 - 1 downto 0);
+        b : in std_logic_vector(16 - 1 downto 0);
+        c : out std_logic_vector(31 - 1 downto 0)
+      );
+    end component;
+
     signal s_sum : scalar;
     signal s_product : scalar;
-    signal s_full_product : std_logic_vector(SCALAR_LENGTH * 2 - 1 downto 0);
+    signal s_left : scalar;
+    signal s_top : scalar;
+    signal s_full_product : std_logic_vector(SCALAR_LENGTH * 2 - 2 downto 0);
     signal s_rst_sum : std_logic;
 begin
+    wallace : wallace_multiplier
+      port map (
+        a => s_left,
+        b => s_top,
+        c => s_full_product
+      );
     
     s_product <= scalar(s_full_product(SCALAR_LENGTH - 1 downto 0));
     process (CLK, i_rst) begin
@@ -60,22 +76,16 @@ begin
             o_right <= (others => '0');
             o_data_bus <= (others => 'Z');
             s_sum <= (others => '0');
-            s_full_product <= (others => '0');
+            s_left <= (others => '0');
+            s_top <= (others => '0');
             s_rst_sum <= '0';
         else
             if rising_edge(CLK) and en = '1' then
                 o_right <= i_left;
                 o_bottom <= i_top;
-                s_full_product <= std_logic_vector(signed(i_left) * signed(i_top));
+                s_left <= i_left;
+                s_top <= i_top;
                 o_req_result <= i_req_result;
-                
-                -- pipeline logic
-                
-                -- if i_req_result = '1' then
-                --     s_rst_sum <= '1';
-                -- else
-                --     s_rst_sum <= '0';
-                -- end if;
                 
                 if i_req_result = '1' then
                     s_sum <= s_product;
